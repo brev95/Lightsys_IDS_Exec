@@ -1,6 +1,6 @@
 import pandas as pd
-import mysql.connector as sql
-from sklearn.naive_bayes import MultinomialNB as MNB
+import mysql.connector as sql 
+from sklearn.naive_bayes import MultinomialNB as MNB 
 from sklearn.feature_extraction import DictVectorizer as DV
 import numpy as np
 
@@ -35,7 +35,7 @@ X_train = vec.fit_transform(X_train).toarray()
 clf = MNB()
 
 #Train classifier
-training = clf.fit(X_train, y_train)
+clf.fit(X_train, y_train)
 
 #Make prediction data usable by sklearn
 X_predict = [dfDict]
@@ -44,7 +44,6 @@ X_predict = vec.fit_transform(X_predict).toarray()
 #Predict classifications of all data
 predictions = clf.predict(X_predict)
 
-print predictions
-
-
-
+for i in predictions:
+    if i == 0:
+        print df.iloc[[i]]
