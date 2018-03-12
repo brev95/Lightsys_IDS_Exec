@@ -36,6 +36,7 @@ with open('outputData.txt', 'w') as output:
 				
 			else:
 				print 'New statement on line ' + i
+				continue
 
 			i += 1
 			
