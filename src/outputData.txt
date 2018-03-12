@@ -1,0 +1,15 @@
+INSERT INTO dev1 VALUES
+('Mar','4','04:01:01','','exec','/bin/logger'),
+('Mar','4','04:01:01','','exec','/etc/cron.hourly/mcelog.cron'),
+('Mar','4','04:01:01','','chdir','/'),
+('Mar','4','04:01:23','71.39.55.55','exec','/usr/bin/id'),
+('Mar','4','04:01:23','71.39.55.55','exec','/usr/bin/rsync'),
+('Mar','4','04:01:23','71.39.55.55','chdir','/home'),
+('Mar','4','04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX/var/www/html/docs'),
+('Mar','4','04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX'),
+('Mar','4','04:01:24','71.39.55.55','exec','/usr/sbin/sshd'),
+('Mar','4','04:01:24','71.39.55.55','chdir','/'),
+('Mar','4','04:01:24','71.39.55.55','chdir','/var/empty/sshd'),
+('Mar','4','04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM/var/www/html/stormcloud'),
+('Mar','4','04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM');
+
