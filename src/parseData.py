@@ -164,4 +164,8 @@ with open('outputData.txt', 'rb+') as output:
 	output.close
 	
 with open('outputData.txt', 'a') as output:
-	output.write(";\n\n")
+	output.write(";")
+	
+	
+	
+#delete from dev1
