@@ -1,15 +1,15 @@
 INSERT INTO dev1 VALUES
-('Mar','4','04:01:01','','exec','/bin/logger'),
-('Mar','4','04:01:01','','exec','/etc/cron.hourly/mcelog.cron'),
-('Mar','4','04:01:01','','chdir','/'),
-('Mar','4','04:01:23','71.39.55.55','exec','/usr/bin/id'),
-('Mar','4','04:01:23','71.39.55.55','exec','/usr/bin/rsync'),
-('Mar','4','04:01:23','71.39.55.55','chdir','/home'),
-('Mar','4','04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX/var/www/html/docs'),
-('Mar','4','04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX'),
-('Mar','4','04:01:24','71.39.55.55','exec','/usr/sbin/sshd'),
-('Mar','4','04:01:24','71.39.55.55','chdir','/'),
-('Mar','4','04:01:24','71.39.55.55','chdir','/var/empty/sshd'),
-('Mar','4','04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM/var/www/html/stormcloud'),
-('Mar','4','04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM');
+('2018-3-4 04:01:01','','exec','/bin/logger','logger -p cron.notice -t run-parts(/etc/cron.hourly)[22182] starting mcelog.cron','/bin/logger[run-parts:22193]','0','0','0','0','/usr/bin/run-parts[run-parts:22182]','0','0','0','0'),
+('2018-3-4 04:01:01','','exec','/etc/cron.hourly/mcelog.cron','/etc/cron.hourly/mcelog.cron','/etc/cron.hourly/mcelog.cron[run-parts:22194]','0','0','0','0','/usr/bin/run-parts[run-parts:22182]','0','0','0','0'),
+('2018-3-4 04:01:01','','chdir','/','','/sbin/service[service:22196]','0','0','0','0','/etc/cron.hourly/mcelog.cron[mcelog.cron:22194]','0','0','0','0'),
+('2018-3-4 04:01:23','71.39.55.55','exec','/usr/bin/id','/usr/bin/id -u','/usr/bin/id[bash:22264]','0','0','0','0','/bin/bash[bash:22263]','0','0','0','0'),
+('2018-3-4 04:01:23','71.39.55.55','exec','/usr/bin/rsync','/usr/bin/rsync --server --sender -vlogDtprze.iLs .  /home/','/usr/bin/rsync[bash:22250]','0','0','0','0','/usr/sbin/sshd[sshd:22248]','0','0','0','0'),
+('2018-3-4 04:01:23','71.39.55.55','chdir','/home','','/usr/bin/rsync[rsync:22250]','0','0','0','0','/usr/sbin/sshd[sshd:22248]','0','0','0','0'),
+('2018-3-4 04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX/var/www/html/docs','','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:19935]','48','48','48','48','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:7550]','0','0','0','0'),
+('2018-3-4 04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX','','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:19935]','48','48','48','48','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:7550]','0','0','0','0'),
+('2018-3-4 04:01:24','71.39.55.55','exec','/usr/sbin/sshd','/usr/sbin/sshd -R','/usr/sbin/sshd[sshd:22266]','0','0','0','0','/usr/sbin/sshd[sshd:1562]','0','0','0','0'),
+('2018-3-4 04:01:24','71.39.55.55','chdir','/','','/usr/sbin/sshd[sshd:22266]','0','0','0','0','/usr/sbin/sshd[sshd:1562]','0','0','0','0'),
+('2018-3-4 04:01:24','71.39.55.55','chdir','/var/empty/sshd','','/usr/sbin/sshd[sshd:22267]','0','0','0','0','/usr/sbin/sshd[sshd:22266]','0','0','0','0'),
+('2018-3-4 04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM/var/www/html/stormcloud','','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:19732]','48','48','48','48','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:7047]','0','0','0','0'),
+('2018-3-4 04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM','','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:19732]','48','48','48','48','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:7047]','0','0','0','0');
 
