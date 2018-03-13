@@ -45,8 +45,10 @@ def new_data(query):
     training_X = pd.concat(anomolies_X, normal_X)
     training_y = pd.concat(anomolies_y, normal_y)
     
-    X_train = vec.fit_transform(training_X)
-    y_train = np.asarray(training_y)
+    X_train = training_X.to_dict(orient='records')
+    X_train = vec.fit_transform(X_train)
+    
+    y_train = training_y.as_matrix()
 	
 	clf.fit(X_train, y_train)
     
