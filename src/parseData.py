@@ -28,7 +28,8 @@ def parseMonth(month):
 
 with open('unknown.txt', 'w') as unknown:
 	with open('outputData.txt', 'w') as output:
-		with open('..\delete\commands-20180311', 'r') as sampleData:
+		# with open('..\delete\commands-20180311', 'r') as sampleData:
+		with open('..\SampleData.txt', 'r') as sampleData:
 			spamreader = csv.reader(sampleData, delimiter=' ')
 			
 			#output.write("INSERT INTO dev1 VALUES\n")
@@ -38,53 +39,50 @@ with open('unknown.txt', 'w') as unknown:
 			for line in spamreader:
 				
 				try:
-					if("chroot" in line):
+					if(line[7] == 'From'):
 						output.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
 						output.write("'" + str(line[8]).strip(':') + "',")																# IP
 						output.write("'" + str(line[9]) + "',")																			# Run
 						output.write("'" + str(line[11]) + "',")																		# Command
 						
-						index = 12
-						concat = ""
-						
-						while(str(line[index]) != "by"):
-							concat += str(line[index]) + " "
-							index += 1
-						
-						output.write("'" + concat.lstrip('(').rstrip(" ") + "',")														# Parameters
-						
-						index += 2		# Increment past 'by'
-						
-						output.write("'" + str(line[index]) + "',")																		# Invoker
-						
-						index += 1		# Increment to UID/EUID
-						
-						output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# UID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[1] + "',")											# EUID
-						
-						index += 1		# Increment to GID/EGID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# GID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "',")								# EGID
-						
-						index += 2		# Increment to parent process
-						output.write("'" + str(line[index]) + "',")																		# Parent Process
-						
-						index += 1		# Increment to PUID/PEUID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# PUID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[1] + "',")											# PEUID
-						
-						index += 1		# Increment to PGID/PEGID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# PGID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "'")								# PEGID
-						
-						
-					elif(line[7] == 'From'):
-						output.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
-						output.write("'" + str(line[8]).strip(':') + "',")																# IP
-						output.write("'" + str(line[9]) + "',")																			# Run
-						output.write("'" + str(line[11]) + "',")																		# Command
-						
-						if(line[9] == 'exec'):											
+						if(line[9] == 'exec'):
+							# if("chroot" in line):
+								# index =11
+								# concat = ""
+								
+								# while(str(line[index]) != "by"):
+									# concat += str(line[index]) + " "
+									# index += 1
+								
+								# concat += "chroot"
+								
+								# output.write("'" + concat.lstrip('(').rstrip(" ") + "',")														# Parameters
+								# output.write("'" + str(line[12]) + "',")														# Parameters
+								
+								# index += 3		# Increment past 'by process'
+								
+								# output.write("'" + str(line[index]) + "',")																		# Invoker
+								
+								# index += 1		# Increment to UID/EUID
+								
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# UID
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[1] + "',")											# EUID
+								
+								# index += 1		# Increment to GID/EGID
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# GID
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "',")								# EGID
+								
+								# index += 2		# Increment to parent process
+								# output.write("'" + str(line[index]) + "',")																		# Parent Process
+								
+								# index += 1		# Increment to PUID/PEUID
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# PUID
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[1] + "',")											# PEUID
+								
+								# index += 1		# Increment to PGID/PEGID
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# PGID
+								# output.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "'")								# PEGID
+							# else:
 							index = 12
 							concat = ""
 							
@@ -136,9 +134,10 @@ with open('unknown.txt', 'w') as unknown:
 					
 					elif(line[7] == 'exec'):
 						output.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
-						output.write("'" + '' + "',")																					# IP
+						output.write("' ',")																							# IP
 						output.write("'" + str(line[7]) + "',")																			# Run
 						output.write("'" + str(line[9]) + "',")																			# Command
+					
 						index = 10
 						concat = ""
 							
