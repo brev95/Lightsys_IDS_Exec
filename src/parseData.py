@@ -28,8 +28,8 @@ def parseMonth(month):
 
 with open('unknown.txt', 'w') as unknown:
 	with open('outputData.txt', 'w') as output:
-		# with open('..\delete\commands-20180311', 'r') as sampleData:
-		with open('..\SampleData.txt', 'r') as sampleData:
+		with open('..\delete\commands-20180311', 'r') as sampleData:
+		# with open('..\SampleData.txt', 'r') as sampleData:
 			spamreader = csv.reader(sampleData, delimiter=' ')
 			
 			#output.write("INSERT INTO dev1 VALUES\n")
@@ -39,7 +39,9 @@ with open('unknown.txt', 'w') as unknown:
 			for line in spamreader:
 				
 				try:
-					if(line[7] == 'From'):
+					if("chroot" in line):
+						unknown.write(str(line) + "\n")
+					elif(line[7] == 'From'):
 						output.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
 						output.write("'" + str(line[8]).strip(':') + "',")																# IP
 						output.write("'" + str(line[9]) + "',")																			# Run
@@ -206,7 +208,7 @@ with open('unknown.txt', 'w') as unknown:
 						output.write("'" + str(line[index]).split(":")[1].split("/")[1] + "',")											# PEUID
 						index += 1
 						output.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# PGID
-						output.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "'")									# PEGID
+						output.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "'")								# PEGID
 						
 						output.write("),\n")
 					else:
