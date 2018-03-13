@@ -1,3 +1,5 @@
 delete/
 src/unknown.txt
 src/outputData.txt
+*.pyc
+*.swp
