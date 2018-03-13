@@ -52,7 +52,7 @@ def parseMonth(month):
 	elif(month == "Dec"):
 		return '12';
 
-connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
+#connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
 
 with open('unknown.txt', 'w') as unknown:
 	with open('outputData.txt', 'w') as output:
@@ -201,6 +201,8 @@ with open('unknown.txt', 'w') as unknown:
 						
 					
 					elif(line[7] == 'chdir'):
+						#print(output.mode)
+							
 						output.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
 						output.write("'" + '' + "',")																					# IP
 						output.write("'" + str(line[7]) + "',")																			# Run
@@ -252,6 +254,14 @@ with open('unknown.txt', 'w') as unknown:
 	
 						with open('outputData.txt', 'a') as output:
 							output.write(";\n")
+						
+						#with open('outputData.txt', 'r') as output:
+						#	connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
+						#	filenm = output
+						#	insertDB(filenm, connection)
+						#	connection.commit()
+						#	connection.close()
+						#with open('outputData.txt', 'w'):
 							output.write("INSERT INTO dev1 VALUES")
 
 						# callInsert()
