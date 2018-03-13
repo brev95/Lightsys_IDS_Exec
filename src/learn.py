@@ -3,79 +3,137 @@ import mysql.connector as sql
 from sklearn.naive_bayes import MultinomialNB as MNB 
 from sklearn.feature_extraction import DictVectorizer as DV
 import numpy as np
+from sklearn.externals import joblib
 
-
-#Make a classifier to train
-clf = MNB()
-
-#Make a vector that will transform all data into a usable format
-vec = DV()
 
 #A list to contain all the dictionaries of training data
 #training_data_X = list()
 #training_data_y = list()
 
+#TODO make this secure
+#Information about the database to be accessed
+host='localhost'
+user='root'
+passwd='nosrebob'
+db='grsecure_log'
+table='dev1'
+
+typicalIPs = ['10.254.254.0/24', '10.254.253.0/24', '204.238.168.224/27', '71.39.55.48/29', '10.5.0.0/17', '10.5.128.0/24']
 
 #run predictions and train algorithm on new data
-def new_data(query):
-	#TODO make this secure
-	#Information about the database to be accessed
-	host='localhost'
-	user='root'
-	passwd='nosrebob'
-	db='grsecure_log'
-	table='dev1'
-
-	#Connect to sql database and read table into a pandas dataframe
-	db_connection = sql.connect(host=host, user=user, passwd=passwd, db=db)
-	df = pd.read_sql(query, con=db_connection, parse_dates=['date'])
+def train_on_data(query):
+    #Make or read a classifier to train
+    try:
+        clf = joblib.load('clf.pkl')
+    except: 
+        clf = MNB()
+    
+    '''
+    #Make or read in a vector to train
+    try:
+        vec = joblib.load('vec.pkl')
+    except: 
+        vec = DV()
+        
+    #Make or get values of other X values to keep training consistent
+    
+    try:
+        old_training_X = pd.read_pickle('training_X.pkl')
+    except:
+        old_training_X = pd.DataFrame()
+    '''
+    
+    #Connect to sql database and read table into a pandas dataframe
+    db_connection = sql.connect(host=host, user=user, passwd=passwd, db=db)
+    df = pd.read_sql(query, con=db_connection, parse_dates=['date'])
     
     #Add attribute that says whether a row is duplciated anywhere else in the dataframe
     dfNoDates = df.drop('date')
     dfNoDates['normal'] = dfNoDates.duplicated(keep=False)
-    anomolies = dfNoDates[dfNoDates.normal == False]
-    normal = dfNoDates[dfNoDates.normal == True]
     
-    anomolies_y = anomolies['normal']
-    anomolies_X = anomolies.drop('normal')
+    #Make those rows with activity from accepted IPs 'normal'
+    normalRows = list()
+    for index, row in dfNoDates.iterrows():
+        if row['ipaddr'] in typicalIPs:
+            normalRows.append(index)
     
-    normal_y = normal['normal']
-    normal_X = normal.drop('normal')
+    for index in normalRows:
+        dfNoDates.at[index, 'normal'] = True
     
-    training_X = pd.concat(anomolies_X, normal_X)
-    training_y = pd.concat(anomolies_y, normal_y)
+    #Separate anomalies and normal
+    for index, row in dfNoDates.iterrows():
+        if row['normal']:
+            dfNoDates.at[index, 'normal'] = 1
+        else:
+            dfNoDates.at[index, 'normal'] = 0
     
-    X_train = training_X.to_dict(orient='records')
-    X_train = vec.fit_transform(X_train)
+    training_X = dfNoDates.drop('normal')
+    training_y = dfNoDates['normal']
     
+    #add new values to training set
+    #all_vec_X = pd.concat([training_X, old_training_X])
+    
+    #vec.fit(all_vec_X.to_dict(orient='records'))
+    
+    #X_train = vec.transform(all_vec_X.to_dict(orient='records')).toarray()
+    #X_train = vec.transform(training_X.to_dict(orient='records')).toarray()
+    X_train = training_X.as_matrix()
     y_train = training_y.as_matrix()
 	
-	clf.fit(X_train, y_train)
+    #train the classifier
+    clf.fit(X_train, y_train)
+     
+
     
-	#predict on the new values
-	predictions = clf.predict(X_test)
-	for i in range(len(predictions)):
-		#send message if an anomoly is found
-		if predictions[i] == False:
-			msg = 'anomoly detected: ' + df.iloc[[i]]
+    #all_vec_X.to_pickle('training_X.pkl')    
+    joblib.dump(clf, 'clf.pkl')
+    #joblib.dump(vec, 'vec.pkl')
+    
+    
+def predict(query):
+    try:
+        clf = joblib.load('clf.pkl')
+    except: 
+        print 'classifier does not exist'
+    
+    #Connect to sql database and read table into a pandas dataframe
+    db_connection = sql.connect(host=host, user=user, passwd=passwd, db=db)
+    df = pd.read_sql(query, con=db_connection, parse_dates=['date'])
+    
+    #Add attribute that says whether a row is duplciated anywhere else in the dataframe
+    dfNoDates = df.drop('date')
+    X_test = dfNoDates.to_dict(orient='records')
+    
+    #predict on the new values
+    predictions = clf.predict(X_test)
+    for i in range(len(predictions)):
+        #send message if an anomoly is found
+        if predictions[i] == 0:
+            msg = 'anomoly detected: ' + df.iloc[[i]]
+            print msg
+            
+    train_on_data(query)
+    
+#An initiial test
+train_on_data('SELECT * FROM dev1 LIMIT 10')
+predict('SELECT * FROM dev1 LIMIT 30')
 
-			#feedback = get_feedback(msg) #TODO: implement get_feedback(msg)
-			print predictions[i]
-            
-            
-    '''
-	#Fit data to test into an appropriate format
-	new_training_data = df.to_dict(orient='records')	
-	X_test = vec.transform(new_training_data).toarray() #Gives the array needed for testing the new values
 
-    #train on the new data
-    training_data_X = training_data_X + new_training_data
-    training_data_y = training_data_y + predictions
-    '''
-            
+        
 #an initial query to get the starting training_data_X and training_data_y values
-initial_query = "SELECT * FROM " + table
-new_data(initial_query)
+'''
+dates = [['2018-01-01', '2018-01-21'], ['2018-01-08', '2018-01-28'], ['2018-01-15', '2018-02-04']]
+
+for date in dates:
+    start = date[0]
+    end = date[1]
+    train_on_data('SELECT * FROM ' + table + ' WHERE date >= ' + start + ' AND date <= ' + end)
+'''
+
+#TODO: make queries that run prediction testing on data
+#predict(query)
+
+
 
 
 
