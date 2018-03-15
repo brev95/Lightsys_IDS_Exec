@@ -1,12 +1,12 @@
 import os, sys, csv
-#import mysql.connector as mysql
+import mysql.connector as mysql
 
 hostname = 'localhost'
 username = 'root'
 password = 'nosrebob'
 database = 'grsecure_log'
 
-insertLines = 13
+insertLines = 500
 
 oFile = "outputData.txt"
 
@@ -29,7 +29,7 @@ def callInsert():
 	f.close()
 
 	f = open(oFile, 'a')
-	f.write("INSERT INTO dev1 VALUES")
+	f.write("INSERT INTO dev1 VALUES\n")
 
 def parseMonth(month):
 	if(month == "Jan"):
@@ -57,11 +57,11 @@ def parseMonth(month):
 	elif(month == "Dec"):
 		return '12';
 
-#connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
+connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
 
 with open('unknown.txt', 'w') as unknown:
 	f = open(oFile, 'w')
-	with open('..\delete\commands-20180311', 'r') as sampleData:
+	with open('../../../commands-20180311', 'r') as sampleData:
 	# with open('..\SampleData.txt', 'r') as sampleData:
 		spamreader = csv.reader(sampleData, delimiter=' ')
 		
@@ -262,14 +262,15 @@ with open('unknown.txt', 'w') as unknown:
 					f = open(oFile, 'a')
 					f.write(";\n")
 					
-					#f = open(oFile, 'r')
-					#connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
-					#filenm = f
-					#insertDB(filenm, connection)
-					#connection.commit()
-					#connection.close()
-					#f = open(oFile, 'w'):
-					f.write("INSERT INTO dev1 VALUES")
+					f = open(oFile, 'r')
+					connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
+					filenm = f
+					insertDB(filenm, connection)
+					connection.commit()
+					connection.close()
+					
+					f = open(oFile, 'w')
+					f.write("INSERT INTO dev1 VALUES\n")
     
 					# callInsert()
 					
@@ -287,11 +288,11 @@ f.truncate()
 f = open(oFile, 'a')
 f.write(");")
 
-#f = open(oFile, 'r')
-#filenm = f
-#insertDB(filenm, connection)
-#connection.commit()
-#connection.close()
+f = open(oFile, 'r')
+filenm = f
+insertDB(filenm, connection)
+connection.commit()
+connection.close()
 		
 #f = open(oFile, 'rb+')
 #f.seek(-2, os.SEEK_END)

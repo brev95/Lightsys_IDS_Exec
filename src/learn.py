@@ -48,7 +48,7 @@ def train_on_data(query):
     df = pd.read_sql(query, con=db_connection, parse_dates=['date'])
     
     #Add attribute that says whether a row is duplciated anywhere else in the dataframe
-    dfNoDates = df.drop('date')
+    dfNoDates = df.drop(columns='date')
     dfNoDates['normal'] = dfNoDates.duplicated(keep=False)
     
     #Make those rows with activity from accepted IPs 'normal'
@@ -67,8 +67,8 @@ def train_on_data(query):
         else:
             dfNoDates.at[index, 'normal'] = 0
     
-    training_X = dfNoDates.drop('normal')
-    training_y = dfNoDates['normal']
+    training_X = dfNoDates.drop(columns='normal')
+    training_y = dfNoDates[['normal']]
     
     #add new values to training set
     #all_vec_X = pd.concat([training_X, old_training_X])
