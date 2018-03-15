@@ -6,7 +6,13 @@ username = 'root'
 password = 'nosrebob'
 database = 'grsecure_log'
 
-insertLines = 500
+db = input("Choose database: ")
+
+insertLines = 250
+
+iFile = input("Give relative path to file (Use quotes): ")
+
+year = iFile.split('-')[1][:4]
 
 oFile = "outputData.txt"
 
@@ -29,7 +35,7 @@ def callInsert():
 	f.close()
 
 	f = open(oFile, 'a')
-	f.write("INSERT INTO dev1 VALUES\n")
+	f.write("INSERT INTO " + db + " VALUES\n")
 
 def parseMonth(month):
 	if(month == "Jan"):
@@ -61,21 +67,28 @@ connection = mysql.connect(host = hostname, user = username, passwd = password, 
 
 with open('unknown.txt', 'w') as unknown:
 	f = open(oFile, 'w')
-	with open('../../../commands-20180311', 'r') as sampleData:
+	with open(iFile, 'r') as sampleData:
+	# with open('../../../commands-20180311', 'r') as sampleData:
 	# with open('..\SampleData.txt', 'r') as sampleData:
 		spamreader = csv.reader(sampleData, delimiter=' ')
 		
-		f.write("INSERT INTO dev1 VALUES\n")
+		f.write("INSERT INTO " + db + " VALUES\n")
 		
 		i = 0
 		
 		for line in spamreader:
 			
 			try:
-				if("chroot" in line):
+				if("chroot" in str(line)):
 					unknown.write(str(line) + "\n")
+				elif(str(line).count("parent") == 0):
+					unknown.write(str(line) + "\n")
+				elif(str(line).count("parent") > 1):
+					unknown.write(str(line) + "\n")
+
+
 				elif(line[7] == 'From'):
-					f.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
+					f.write("('" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
 					f.write("'" + str(line[8]).strip(':') + "',")																# IP
 					f.write("'" + str(line[9]) + "',")																			# Run
 					f.write("'" + str(line[11]) + "',")																		# Command
@@ -168,7 +181,7 @@ with open('unknown.txt', 'w') as unknown:
 					f.write("),\n")
 				
 				elif(line[7] == 'exec'):
-					f.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
+					f.write("('" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
 					f.write("' ',")																							# IP
 					f.write("'" + str(line[7]) + "',")																			# Run
 					f.write("'" + str(line[9]) + "',")																			# Command
@@ -210,7 +223,7 @@ with open('unknown.txt', 'w') as unknown:
 				elif(line[7] == 'chdir'):
 					#print(f.mode)
 						
-					f.write("('2018-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
+					f.write("('" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
 					f.write("'" + '' + "',")																					# IP
 					f.write("'" + str(line[7]) + "',")																			# Run
 					
@@ -253,6 +266,7 @@ with open('unknown.txt', 'w') as unknown:
 				i += 1
     
 				if( i % insertLines == 0 or line is None):
+					print(i)
 					f.close()
 					f = open(oFile, 'rb+')
 					f.seek(-2, os.SEEK_END)
@@ -262,15 +276,18 @@ with open('unknown.txt', 'w') as unknown:
 					f = open(oFile, 'a')
 					f.write(";\n")
 					
-					f = open(oFile, 'r')
-					connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
-					filenm = f
-					insertDB(filenm, connection)
-					connection.commit()
-					connection.close()
-					
+					try:
+						f = open(oFile, 'r')
+						connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
+						filenm = f
+						insertDB(filenm, connection)
+						connection.commit()
+						connection.close()
+					except (mysql.ProgrammingError, mysql.DataError):
+						pass	
+
 					f = open(oFile, 'w')
-					f.write("INSERT INTO dev1 VALUES\n")
+					f.write("INSERT INTO " + db + " VALUES\n")
     
 					# callInsert()
 					
