@@ -7,28 +7,26 @@ user='root'
 passwd='nosrebob'
 db='grsecure_log'
 
-
+# If no arguments, errors and shoes usage statement
 if(len(sys.argv) != 3):
         print("usage: python learn.py <input_database> <output_database>")
         exit()
 
-#Connect to sql database
+# Make connection to database
 conn = sql.connect(host=host, user=user, passwd=passwd, db=db)
 conn.text_factory = str
 cur = conn.cursor()
 
-#globals
+# Globals
 INPUT_TABLE = str(sys.argv[1])	# Table of new input data
 FREQUENCY_TABLE = str(sys.argv[2])	# Table of frequency/classification values
 
-newCommands = list()
-newCommandsClass = dict()
-commandFQ = defaultdict( int )
-commandClass = dict()
-commandProb = dict()
-conditionalFQ = defaultdict(lambda: defaultdict(int))
+newCommands = list()		
+commandFQ = defaultdict( int )	# { <command> : <frequency> }
+commandClass = dict()		# { <command> : <class> } 
+classFQ = defaultdict( int )	# { <class> : <frequency> }
+conditionalFQ = defaultdict(lambda: defaultdict(int)) # { <class> : { <command> : <frequency> } }
 total = 0
-classFQ = {'anomaly':0, 'normal':0}
 
 
 #first query to fill dicitonaries from first dataset
@@ -43,10 +41,7 @@ def getNewCommands():
 
 #Get the frequency table and store in memory as appropriate
 def getFrequencyTable():
-	global commandFQ
-	global commandClass
 	global total
-	global conditionalFQ
 	cur.execute("SELECT * FROM " + FREQUENCY_TABLE)
 	c = cur.fetchall()
 	for items in c:
@@ -60,32 +55,29 @@ def getFrequencyTable():
 		classFQ[cls] = classFQ[cls] + freq
 		conditionalFQ[cls][cmd] = freq
 
-#Classify new data according to bayesian classification
+# Classify new data according to bayesian classification and write lines of anomalous data to "anomalies.txt"
 def bayesianClassifier():
-	global newCommands
-	global commandClass
-	global commandFQ
-	global classFQ
 	with open('anomalies.txt', 'w') as output:
 		for cmd in set(newCommands):
 			argmax = 'anomaly'
 			maxVal = 0.0
 			for cls in ['normal', 'anomaly']:
-				clsProb = float(classFQ[cls])/total          #P(cls) the probability of the given class
+				clsProb = float(classFQ[cls])/total 		# P(cls) : the probability that the class is the given class
 				
-				#TODO when adding more features, this will be the product of probability of all those features
-				#	will be P(y)*Product(x_i | cls).  for now, only x_i value is command frequency.
+				# If adding more features than just commands, this will be the product of probability of all those features
+				#	(i.e. Product(x_i | cls) where 'x_i' is the given feature.  
+				#	For now, only x_i value is frequency of commands.
 				
-				cmdProb = float(conditionalFQ[cls][cmd])/classFQ[cls]   	#P(x_i | cls) the probability that the command is this one, given the current class
+				cmdProb = float(conditionalFQ[cls][cmd])/classFQ[cls]	# P(x_i | cls) : the probability that the command is this one, given the current class
 				
-				posteriori = cmdProb*clsProb
+				posteriori = cmdProb*clsProb			# Poseriori = P(cls) * Product( P(x_i | cls) )
 
-				#find the class value that maximizes the bayesian Posteriori
+				# Find the class value that maximizes the posteriori
 				if posteriori > maxVal:
 					argmax = cls
 					maxVal = posteriori
 			
-			#set the class of the command to the appropriate class
+			# Set the class of the command to the class that maximizes the posteriori and if anomalous, write to output file
 			commandClass[cmd] = argmax
 			if argmax == 'anomaly':
 				cur.execute("SELECT * FROM " + INPUT_TABLE + " WHERE command = \'" + cmd + "\'")
@@ -96,28 +88,21 @@ def bayesianClassifier():
 						outputLine = outputLine + str(word) + ', '
 					output.write(outputLine + '\b\b\n')
 
-#Update the command frequencies from the new data
+# Update the command frequencies from the new data
 def learnFromNew():
-	global commandClass
-	global commandFQ
 	for cmd in newCommands:
-		try:
-			commandFQ[cmd] = commandFQ[cmd] + 1
-		except:
-			commandFQ[cmd] = 1
+		commandFQ[cmd] = commandFQ[cmd] + 1
+		
 
-#Update the frequency table
+# Update the frequency table on the server
 def updateFrequencyTable():
-	global commandFQ
-	global commandClass
 	cur.execute("DELETE FROM " + FREQUENCY_TABLE)
 	for cmd in commandFQ.keys():
 		cur.execute("INSERT INTO " + FREQUENCY_TABLE + " VALUE (\'" + cmd + "\', " + str(commandFQ[cmd]) + ", \'" + commandClass[cmd]  + "\')")
 		conn.commit()
 
 
-# Get the new commands, and the current frequency table
-# Run the bayesian classifier, learn from this data, and update the frequency table
+# Get the new commands, and the current frequency table, then run the classifier and update frequency table
 getNewCommands()
 getFrequencyTable()
 bayesianClassifier()

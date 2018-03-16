@@ -1,24 +1,22 @@
 import os, sys, csv
 import mysql.connector as mysql
 
+# Variables used to connect to database. Change as necessary
 hostname = 'localhost'
 username = 'root'
 password = 'nosrebob'
 database = 'grsecure_log'
 
+# If no arguments, errors and shows usage statement
 if(len(sys.argv) != 3):
 	print("usage: python parseDataFix.py <database> <relative/path/to/file>")
 	exit()
 
 db = str(sys.argv[1]) # Database to insert into
 
-#db = input("Choose database: ")
-
 insertLines = 100 # Number of lines to insert into database at a time
 
 iFile = str(sys.argv[2]) # File to insert into database
-
-#iFile = input("Give relative path to file (Use quotes): ")
 
 year = iFile.split('-')[1][:4] # Parse the file name for the year
 
@@ -26,25 +24,12 @@ oFile = "outputData.txt"
 
 f = open(oFile, 'w')
 
+# Used to insert log entries into database 
 def insertDB(filenm, conn):
 	curr = conn.cursor()
 	curr.execute(filenm.read())
 
-def callInsert():
-	f.close()
-	f = open(oFile, 'rb+')		
-	
-	f.seek(-2, os.SEEK_END)
-	f.truncate()
-	f.close()
-	
-	f = open(oFile, 'a')
-	f.write(";\n")
-	f.close()
-
-	f = open(oFile, 'a')
-	f.write("INSERT INTO " + db + " VALUES\n")
-
+# Self explanatory. Converts month to number format
 def parseMonth(month):
 	if(month == "Jan"):
 		return '1';
@@ -71,13 +56,13 @@ def parseMonth(month):
 	elif(month == "Dec"):
 		return '12';
 
+# Starts connection to database
 connection = mysql.connect(host = hostname, user = username, passwd = password, db = database)
 
-with open('unknown.txt', 'w') as unknown:
+with open('unknown.txt', 'w') as unknown: # Unknown formatting of log file inserted into unknown.txt
 	f = open(oFile, 'w')
 	with open(iFile, 'r') as sampleData:
-	# with open('../../../commands-20180311', 'r') as sampleData:
-	# with open('..\SampleData.txt', 'r') as sampleData:
+		# Open insert and output file and read in insert file as csv
 		spamreader = csv.reader(sampleData, delimiter=' ')
 		
 		f.write("INSERT INTO " + db + " VALUES\n")
@@ -87,14 +72,14 @@ with open('unknown.txt', 'w') as unknown:
 		for line in spamreader:
 			
 			try:
-				if("chroot" in str(line)):
+				if("chroot" in str(line)): # If "chroot" is in the line, output to unknown.txt instead of outputFile.txt
 					unknown.write(str(line) + "\n")
 				elif(str(line).count("parent") == 0):
 					unknown.write(str(line) + "\n")
 				elif(str(line).count("parent") > 1):
 					unknown.write(str(line) + "\n")
 
-
+				# Grabs input data and parses into insert statements in outputData.txt
 				elif(line[7] == 'From'):
 					
 					f.write("('','" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
@@ -103,43 +88,6 @@ with open('unknown.txt', 'w') as unknown:
 					f.write("'" + str(line[11]) + "',")																		# Command
 					
 					if(line[9] == 'exec'):
-						# if("chroot" in line):
-							# index =11
-							# concat = ""
-							
-							# while(str(line[index]) != "by"):
-								# concat += str(line[index]) + " "
-								# index += 1
-							
-							# concat += "chroot"
-							
-							# f.write("'" + concat.lstrip('(').rstrip(" ") + "',")														# Parameters
-							# f.write("'" + str(line[12]) + "',")														# Parameters
-							
-							# index += 3		# Increment past 'by process'
-							
-							# f.write("'" + str(line[index]) + "',")																		# Invoker
-							
-							# index += 1		# Increment to UID/EUID
-							
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# UID
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[1] + "',")											# EUID
-							
-							# index += 1		# Increment to GID/EGID
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# GID
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "',")								# EGID
-							
-							# index += 2		# Increment to parent process
-							# f.write("'" + str(line[index]) + "',")																		# Parent Process
-							
-							# index += 1		# Increment to PUID/PEUID
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# PUID
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[1] + "',")											# PEUID
-							
-							# index += 1		# Increment to PGID/PEGID
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[0] + "',")											# PGID
-							# f.write("'" + str(line[index]).split(":")[1].split("/")[1].rstrip(",") + "'")								# PEGID
-						# else:
 						index = 12
 						concat = ""
 						
@@ -269,13 +217,12 @@ with open('unknown.txt', 'w') as unknown:
 					
 					f.write("),\n")
 				else:
-					#print 'New statement on line ' + str(i)
 					continue
+   				 
+				i += 1	# Line count
     
-				i += 1
-    
+				# When line numbers == the number of lines in the insert statement, inserts into the database
 				if( i % insertLines == 0 or line is None):
-					#print(i)
 					f.close()
 					f = open(oFile, 'rb+')
 					f.seek(-2, os.SEEK_END)
@@ -297,35 +244,9 @@ with open('unknown.txt', 'w') as unknown:
 					f = open(oFile, 'w')
 					f.write("INSERT INTO " + db + " VALUES\n")
     
-					# callInsert()
-					
-					
 			except IndexError:
 				unknown.write(str(line) + "\n")
 			
 		sampleData.close()
 	f.close()
 	unknown.close()
-f = open(oFile, 'rb+')
-f.seek(-2, os.SEEK_END)
-f.truncate()
-	
-f = open(oFile, 'a')
-f.write(");")
-
-f = open(oFile, 'r')
-filenm = f
-insertDB(filenm, connection)
-connection.commit()
-connection.close()
-		
-#f = open(oFile, 'rb+')
-#f.seek(-2, os.SEEK_END)
-#f.truncate()
-#f.close
-	
-#f = open(oFile, 'a')
-#	f.write(";")
-
-
-#delete from dev1
