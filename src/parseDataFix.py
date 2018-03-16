@@ -6,11 +6,19 @@ username = 'root'
 password = 'nosrebob'
 database = 'grsecure_log'
 
-db = input("Choose database: ")
+if(len(sys.argv) != 3):
+	print("usage: python parseDataFix.py <database> <relative/path/to/file>")
+	exit()
 
-insertLines = 250
+db = str(sys.argv[1])
 
-iFile = input("Give relative path to file (Use quotes): ")
+#db = input("Choose database: ")
+
+insertLines = 100
+
+iFile = str(sys.argv[2])
+
+#iFile = input("Give relative path to file (Use quotes): ")
 
 year = iFile.split('-')[1][:4]
 
@@ -88,7 +96,8 @@ with open('unknown.txt', 'w') as unknown:
 
 
 				elif(line[7] == 'From'):
-					f.write("('" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
+					
+					f.write("('','" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
 					f.write("'" + str(line[8]).strip(':') + "',")																# IP
 					f.write("'" + str(line[9]) + "',")																			# Run
 					f.write("'" + str(line[11]) + "',")																		# Command
@@ -181,8 +190,8 @@ with open('unknown.txt', 'w') as unknown:
 					f.write("),\n")
 				
 				elif(line[7] == 'exec'):
-					f.write("('" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
-					f.write("' ',")																							# IP
+					f.write("('','" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
+					f.write("'Server',")																							# IP
 					f.write("'" + str(line[7]) + "',")																			# Run
 					f.write("'" + str(line[9]) + "',")																			# Command
 				
@@ -223,8 +232,8 @@ with open('unknown.txt', 'w') as unknown:
 				elif(line[7] == 'chdir'):
 					#print(f.mode)
 						
-					f.write("('" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
-					f.write("'" + '' + "',")																					# IP
+					f.write("('','" + year + "-" + parseMonth(str(line[0])) + "-" + str(line[2]) + " " + str(line[3]) + "',") 			# DateTime
+					f.write("'Server',")																					# IP
 					f.write("'" + str(line[7]) + "',")																			# Run
 					
 					index = 9
@@ -266,7 +275,7 @@ with open('unknown.txt', 'w') as unknown:
 				i += 1
     
 				if( i % insertLines == 0 or line is None):
-					print(i)
+					#print(i)
 					f.close()
 					f = open(oFile, 'rb+')
 					f.seek(-2, os.SEEK_END)
@@ -285,7 +294,6 @@ with open('unknown.txt', 'w') as unknown:
 						connection.close()
 					except (mysql.ProgrammingError, mysql.DataError):
 						pass	
-
 					f = open(oFile, 'w')
 					f.write("INSERT INTO " + db + " VALUES\n")
     
