@@ -1,14 +1,15 @@
 INSERT INTO dev1 VALUES
-('2018-3-4 04:01:01','','exec','/bin/logger','logger -p cron.notice -t run-parts(/etc/cron.hourly)[22182] starting mcelog.cron','/bin/logger[run-parts:22193]','0','0','0','0','/usr/bin/run-parts[run-parts:22182]','0','0','0','0'),
-('2018-3-4 04:01:01','','exec','/etc/cron.hourly/mcelog.cron','/etc/cron.hourly/mcelog.cron','/etc/cron.hourly/mcelog.cron[run-parts:22194]','0','0','0','0','/usr/bin/run-parts[run-parts:22182]','0','0','0','0'),
-('2018-3-4 04:01:01','','chdir','/','','/sbin/service[service:22196]','0','0','0','0','/etc/cron.hourly/mcelog.cron[mcelog.cron:22194]','0','0','0','0'),
-('2018-3-4 04:01:23','71.39.55.55','exec','/usr/bin/id','/usr/bin/id -u','/usr/bin/id[bash:22264]','0','0','0','0','/bin/bash[bash:22263]','0','0','0','0'),
-('2018-3-4 04:01:23','71.39.55.55','exec','/usr/bin/rsync','/usr/bin/rsync --server --sender -vlogDtprze.iLs .  /home/','/usr/bin/rsync[bash:22250]','0','0','0','0','/usr/sbin/sshd[sshd:22248]','0','0','0','0'),
-('2018-3-4 04:01:23','71.39.55.55','chdir','/home','','/usr/bin/rsync[rsync:22250]','0','0','0','0','/usr/sbin/sshd[sshd:22248]','0','0','0','0'),
-('2018-3-4 04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX/var/www/html/docs','','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:19935]','48','48','48','48','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:7550]','0','0','0','0'),
-('2018-3-4 04:01:23','96.80.89.69','chdir','/usr/local/vserver/WWW-CX','','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:19935]','48','48','48','48','/usr/local/vserver/WWW-CX/usr/sbin/httpd[httpd:7550]','0','0','0','0'),
-('2018-3-4 04:01:24','71.39.55.55','exec','/usr/sbin/sshd','/usr/sbin/sshd -R','/usr/sbin/sshd[sshd:22266]','0','0','0','0','/usr/sbin/sshd[sshd:1562]','0','0','0','0'),
-('2018-3-4 04:01:24','71.39.55.55','chdir','/','','/usr/sbin/sshd[sshd:22266]','0','0','0','0','/usr/sbin/sshd[sshd:1562]','0','0','0','0'),
-('2018-3-4 04:01:24','71.39.55.55','chdir','/var/empty/sshd','','/usr/sbin/sshd[sshd:22267]','0','0','0','0','/usr/sbin/sshd[sshd:22266]','0','0','0','0'),
-('2018-3-4 04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM/var/www/html/stormcloud','','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:19732]','48','48','48','48','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:7047]','0','0','0','0'),
-('2018-3-4 04:01:24','75.163.148.79','chdir','/usr/local/vserver/STORM','','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:19732]','48','48','48','48','/usr/local/vserver/STORM/usr/sbin/httpd[httpd:7047]','0','0','0','0');
+('2018-3-4 03:36:02',' ','exec','/bin/kill','/bin/kill -HUP 1349','/bin/kill[sh:19943]','0','0','0','0','/bin/bash[sh:19940]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/gzip','/bin/gzip','/bin/gzip[logrotate:19944]','0','0','0','0','/usr/sbin/logrotate[logrotate:19605]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/basename','basename /etc/cron.daily/logrotate','/bin/basename[run-parts:19945]','0','0','0','0','/usr/bin/run-parts[run-parts:19574]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/logger','logger -i -p cron.notice -t run-parts(/etc/cron.daily) finished logrotate','/bin/logger[run-parts:19946]','0','0','0','0','/usr/bin/run-parts[run-parts:19574]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/basename','basename /etc/cron.daily/makewhatis.cron','/bin/basename[run-parts:19947]','0','0','0','0','/usr/bin/run-parts[run-parts:19574]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/logger','logger -p cron.notice -t run-parts(/etc/cron.daily)[19574] starting makewhatis.cron','/bin/logger[run-parts:19948]','0','0','0','0','/usr/bin/run-parts[run-parts:19574]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/etc/cron.daily/makewhatis.cron','/etc/cron.daily/makewhatis.cron','/etc/cron.daily/makewhatis.cron[run-parts:19949]','0','0','0','0','/usr/bin/run-parts[run-parts:19574]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/gawk','awk -v progname=/etc/cron.daily/makewhatis.cron progname {        print progname :\n        progname="";           }','/bin/gawk[run-parts:19950]','0','0','0','0','/usr/bin/run-parts[run-parts:19574]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/sed','sed -n -e s/^[[:blank:]]*MAKEWHATISDBUPDATES[[:blank:]]*\(.\)[[:blank:]]*$/\1/p','/bin/sed[makewhatis.cron:19952]','0','0','0','0','/etc/cron.daily/makewhatis.cron[makewhatis.cron:19951]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/touch','touch /var/lock/makewhatis.lock','/bin/touch[makewhatis.cron:19954]','0','0','0','0','/etc/cron.daily/makewhatis.cron[makewhatis.cron:19949]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/sbin/setfiles','restorecon /var/lock/makewhatis.lock','/sbin/setfiles[makewhatis.cron:19955]','0','0','0','0','/etc/cron.daily/makewhatis.cron[makewhatis.cron:19949]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/find','find /usr/sbin/makewhatis -newer /var/cache/man/whatis','/bin/find[makewhatis.cron:19956]','0','0','0','0','/etc/cron.daily/makewhatis.cron[makewhatis.cron:19949]','0','0','0','0'),
+('2018-3-4 03:36:02',' ','exec','/bin/grep','grep -q .','/bin/grep[makewhatis.cron:19957]','0','0','0','0','/etc/cron.daily/makewhatis.cron[makewhatis.cron:19949]','0','0','0','0');
+INSERT INTO dev1 VALUES

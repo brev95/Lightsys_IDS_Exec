@@ -1,148 +1,128 @@
-import pandas as pd
-import mysql.connector as sql 
-from sklearn.naive_bayes import MultinomialNB as MNB 
-from sklearn.feature_extraction import DictVectorizer as DV
-import numpy as np
-from sklearn.externals import joblib
-
-
-#A list to contain all the dictionaries of training data
-#training_data_X = list()
-#training_data_y = list()
-
-#TODO make this secure
+import sys
+import mysql.connector as sql
+from collections import defaultdict
 #Information about the database to be accessed
 host='localhost'
 user='root'
 passwd='nosrebob'
 db='grsecure_log'
-table='dev1'
 
-typicalIPs = ['10.254.254.0/24', '10.254.253.0/24', '204.238.168.224/27', '71.39.55.48/29', '10.5.0.0/17', '10.5.128.0/24']
 
-#run predictions and train algorithm on new data
-def train_on_data(query):
-    #Make or read a classifier to train
-    try:
-        clf = joblib.load('clf.pkl')
-    except: 
-        clf = MNB()
-    
-    '''
-    #Make or read in a vector to train
-    try:
-        vec = joblib.load('vec.pkl')
-    except: 
-        vec = DV()
-        
-    #Make or get values of other X values to keep training consistent
-    
-    try:
-        old_training_X = pd.read_pickle('training_X.pkl')
-    except:
-        old_training_X = pd.DataFrame()
-    '''
-    
-    #Connect to sql database and read table into a pandas dataframe
-    db_connection = sql.connect(host=host, user=user, passwd=passwd, db=db)
-    df = pd.read_sql(query, con=db_connection, parse_dates=['date'])
-    
-    #Add attribute that says whether a row is duplciated anywhere else in the dataframe
-    dfNoDates = df.drop('date')
-    dfNoDates['normal'] = dfNoDates.duplicated(keep=False)
-    
-    #Make those rows with activity from accepted IPs 'normal'
-    normalRows = list()
-    for index, row in dfNoDates.iterrows():
-        if row['ipaddr'] in typicalIPs:
-            normalRows.append(index)
-    
-    for index in normalRows:
-        dfNoDates.at[index, 'normal'] = True
-    
-    #Separate anomalies and normal
-    for index, row in dfNoDates.iterrows():
-        if row['normal']:
-            dfNoDates.at[index, 'normal'] = 1
-        else:
-            dfNoDates.at[index, 'normal'] = 0
-    
-    training_X = dfNoDates.drop('normal')
-    training_y = dfNoDates['normal']
-    
-    #add new values to training set
-    #all_vec_X = pd.concat([training_X, old_training_X])
-    
-    #vec.fit(all_vec_X.to_dict(orient='records'))
-    
-    #X_train = vec.transform(all_vec_X.to_dict(orient='records')).toarray()
-    #X_train = vec.transform(training_X.to_dict(orient='records')).toarray()
-    X_train = training_X.as_matrix()
-    y_train = training_y.as_matrix()
+if(len(sys.argv) != 3):
+        print("usage: python learn.py <input_database> <output_database>")
+        exit()
+
+#Connect to sql database
+conn = sql.connect(host=host, user=user, passwd=passwd, db=db)
+conn.text_factory = str
+cur = conn.cursor()
+
+#globals
+INPUT_TABLE = str(sys.argv[1])	# Table of new input data
+FREQUENCY_TABLE = str(sys.argv[2])	# Table of frequency/classification values
+
+newCommands = list()
+newCommandsClass = dict()
+commandFQ = defaultdict( int )
+commandClass = dict()
+commandProb = dict()
+conditionalFQ = defaultdict(lambda: defaultdict(int))
+total = 0
+classFQ = {'anomaly':0, 'normal':0}
+
+
+#first query to fill dicitonaries from first dataset
+def getNewCommands():
+	global newCommands
+	cur.execute("SELECT command FROM " + INPUT_TABLE)	
+	c = cur.fetchall()
+	for item in c:
+		item = item[0] #item[0] turns tuple of single string into a string
+		newCommands.append(item)
 	
-    #train the classifier
-    clf.fit(X_train, y_train)
-     
 
-    
-    #all_vec_X.to_pickle('training_X.pkl')    
-    joblib.dump(clf, 'clf.pkl')
-    #joblib.dump(vec, 'vec.pkl')
-    
-    
-def predict(query):
-    try:
-        clf = joblib.load('clf.pkl')
-    except: 
-        print 'classifier does not exist'
-    
-    #Connect to sql database and read table into a pandas dataframe
-    db_connection = sql.connect(host=host, user=user, passwd=passwd, db=db)
-    df = pd.read_sql(query, con=db_connection, parse_dates=['date'])
-    
-    #Add attribute that says whether a row is duplciated anywhere else in the dataframe
-    dfNoDates = df.drop('date')
-    X_test = dfNoDates.to_dict(orient='records')
-    
-    #predict on the new values
-    predictions = clf.predict(X_test)
-    for i in range(len(predictions)):
-        #send message if an anomoly is found
-        if predictions[i] == 0:
-            msg = 'anomoly detected: ' + df.iloc[[i]]
-            print msg
-            
-    train_on_data(query)
-    
-#An initiial test
-train_on_data('SELECT * FROM dev1 LIMIT 10')
-predict('SELECT * FROM dev1 LIMIT 30')
+#Get the frequency table and store in memory as appropriate
+def getFrequencyTable():
+	global commandFQ
+	global commandClass
+	global total
+	global conditionalFQ
+	cur.execute("SELECT * FROM " + FREQUENCY_TABLE)
+	c = cur.fetchall()
+	for items in c:
+		cmd = items[0]
+		freq = int(items[1])
+		cls = items[2]
+		
+		total = total + freq
+		commandFQ[cmd] = freq
+		commandClass[cmd] = cls
+		classFQ[cls] = classFQ[cls] + freq
+		conditionalFQ[cls][cmd] = freq
+
+#Classify new data according to bayesian classification
+def bayesianClassifier():
+	global newCommands
+	global commandClass
+	global commandFQ
+	global classFQ
+	with open('anomalies.txt', 'w') as output:
+		for cmd in set(newCommands):
+			argmax = 'anomaly'
+			maxVal = 0.0
+			for cls in ['normal', 'anomaly']:
+				clsProb = float(classFQ[cls])/total          #P(cls) the probability of the given class
+				
+				#TODO when adding more features, this will be the product of probability of all those features
+				#	will be P(y)*Product(x_i | cls).  for now, only x_i value is command frequency.
+				
+				cmdProb = float(conditionalFQ[cls][cmd])/classFQ[cls]   	#P(x_i | cls) the probability that the command is this one, given the current class
+				
+				posteriori = cmdProb*clsProb
+
+				#find the class value that maximizes the bayesian Posteriori
+				if posteriori > maxVal:
+					argmax = cls
+					maxVal = posteriori
+			
+			#set the class of the command to the appropriate class
+			commandClass[cmd] = argmax
+			if argmax == 'anomaly':
+				cur.execute("SELECT * FROM " + INPUT_TABLE + " WHERE command = \'" + cmd + "\'")
+				lines = cur.fetchall()
+				for line in lines:
+					outputLine = ''
+					for word in line:
+						outputLine = outputLine + str(word) + ', '
+					output.write(outputLine + '\b\b\n')
+
+#Update the command frequencies from the new data
+def learnFromNew():
+	global commandClass
+	global commandFQ
+	for cmd in newCommands:
+		try:
+			commandFQ[cmd] = commandFQ[cmd] + 1
+		except:
+			commandFQ[cmd] = 1
+
+#Update the frequency table
+def updateFrequencyTable():
+	global commandFQ
+	global commandClass
+	cur.execute("DELETE FROM " + FREQUENCY_TABLE)
+	for cmd in commandFQ.keys():
+		cur.execute("INSERT INTO " + FREQUENCY_TABLE + " VALUE (\'" + cmd + "\', " + str(commandFQ[cmd]) + ", \'" + commandClass[cmd]  + "\')")
+		conn.commit()
 
 
-        
-#an initial query to get the starting training_data_X and training_data_y values
-'''
-dates = [['2018-01-01', '2018-01-21'], ['2018-01-08', '2018-01-28'], ['2018-01-15', '2018-02-04']]
-
-for date in dates:
-    start = date[0]
-    end = date[1]
-    train_on_data('SELECT * FROM ' + table + ' WHERE date >= ' + start + ' AND date <= ' + end)
-'''
-
-#TODO: make queries that run prediction testing on data
-#predict(query)
-
-
-
-
-
-
-
-
-
-
-
+# Get the new commands, and the current frequency table
+# Run the bayesian classifier, learn from this data, and update the frequency table
+getNewCommands()
+getFrequencyTable()
+bayesianClassifier()
+learnFromNew()
+updateFrequencyTable()
 
 
 
