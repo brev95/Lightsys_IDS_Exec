@@ -6,14 +6,17 @@ username = 'root'
 password = 'nosrebob'
 database = 'grsecure_log'
 
+if(len(sys.argv) != 3):
+	print("usage: python parseDataFix.py <database> <relative/path/to/file>")
+	exit()
 
-db = sys.argv[1]
+db = str(sys.argv[1])
 
 #db = input("Choose database: ")
 
 insertLines = 100
 
-iFile = argv[2]
+iFile = str(sys.argv[2])
 
 #iFile = input("Give relative path to file (Use quotes): ")
 
