@@ -10,17 +10,17 @@ if(len(sys.argv) != 3):
 	print("usage: python parseDataFix.py <database> <relative/path/to/file>")
 	exit()
 
-db = str(sys.argv[1])
+db = str(sys.argv[1]) # Database to insert into
 
 #db = input("Choose database: ")
 
-insertLines = 100
+insertLines = 100 # Number of lines to insert into database at a time
 
-iFile = str(sys.argv[2])
+iFile = str(sys.argv[2]) # File to insert into database
 
 #iFile = input("Give relative path to file (Use quotes): ")
 
-year = iFile.split('-')[1][:4]
+year = iFile.split('-')[1][:4] # Parse the file name for the year
 
 oFile = "outputData.txt"
 
