@@ -29,6 +29,11 @@ Use parseData.py to fill dev2 with single log file that contains the logs to off
 Use learn.py to calucate any anomalies in the chosen log file
 The contents will be outputted to anomalies.txt
 
+Then run the command: 
+
+```sql
+source moveData.sql //
+```
 
 
 
